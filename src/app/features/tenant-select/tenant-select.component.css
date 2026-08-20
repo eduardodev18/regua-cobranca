@@ -1,0 +1,109 @@
+:host { display: block; }
+
+.tenant-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 20% 20%, var(--navy-700), var(--navy-900) 70%);
+  padding: 24px;
+}
+
+.tenant-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--bg-card);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  padding: 36px 36px 28px;
+}
+
+.tenant-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.logo-mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 17px;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.logo-text strong { font-size: 15px; letter-spacing: .5px; color: var(--text-main); }
+.logo-text span { font-size: 10px; color: var(--text-soft); font-weight: 600; letter-spacing: .5px; }
+
+.tenant-title { font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 6px; }
+.tenant-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+
+.tenant-status { font-size: 13px; color: var(--text-muted); }
+
+.tenant-banner {
+  font-size: 12.5px;
+  border-radius: 8px;
+  padding: 10px 12px;
+  line-height: 1.5;
+}
+
+.tenant-banner-error {
+  background: #fdecec;
+  color: #b3261e;
+}
+
+.tenant-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+}
+
+.tenant-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  text-align: left;
+}
+
+.tenant-item:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.tenant-code {
+  flex-shrink: 0;
+  min-width: 34px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.tenant-nome {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-main);
+}

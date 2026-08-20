@@ -1,0 +1,59 @@
+<div class="breadcrumb">
+  <a routerLink="/dashboard">Régua de Cobrança</a>
+  <span>›</span>
+  <span class="current">Relatórios</span>
+</div>
+
+<div class="page-header">
+  <h1 class="page-title">Relatórios</h1>
+</div>
+
+<div class="report-grid">
+  @for (r of relatorios; track r.titulo) {
+    <div class="card report-card">
+      <div class="report-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 20V10M12 20V4M20 20v-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </div>
+      <h4>{{ r.titulo }}</h4>
+      <p>{{ r.descricao }}</p>
+      <button class="btn btn-outline btn-sm" (click)="gerar(r.titulo)">Gerar Relatório</button>
+    </div>
+  }
+</div>
+
+<div class="card">
+  <div class="card-pad card-pad-tight">
+    <h3 class="section-title">Efetividade por Régua</h3>
+  </div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Régua</th>
+          <th>Total de Execuções</th>
+          <th>Sucesso</th>
+          <th>Tentativa</th>
+          <th>Falha</th>
+          <th>Taxa de Sucesso</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of porRegua(); track r.codigo) {
+          <tr>
+            <td class="cell-strong">{{ r.codigo }} - {{ r.descricao }}</td>
+            <td>{{ r.total }}</td>
+            <td><span class="badge badge-green">{{ r.sucesso }}</span></td>
+            <td><span class="badge badge-amber">{{ r.tentativa }}</span></td>
+            <td><span class="badge badge-red">{{ r.falha }}</span></td>
+            <td>
+              <div class="bar-row">
+                <div class="bar-track"><div class="bar-fill" [style.width.%]="r.taxa"></div></div>
+                <span class="bar-value">{{ r.taxa }}%</span>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

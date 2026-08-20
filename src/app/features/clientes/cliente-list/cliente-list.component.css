@@ -1,0 +1,39 @@
+:host { display: block; }
+
+.cli-filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.cli-filters .form-field.grow { flex: 1 1 260px; }
+.limpar-wrap { display: flex; align-items: flex-end; }
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  white-space: nowrap;
+}
+
+.cli-summary {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 14px 20px;
+  font-size: 13px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.cli-summary strong { color: var(--text-main); }
+
+.atraso-badge { margin-left: 8px; font-size: 10.5px; padding: 2px 7px; }
+
+@media (max-width: 900px) {
+  .cli-filters { flex-direction: column; align-items: stretch; }
+}

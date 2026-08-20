@@ -1,0 +1,56 @@
+<div class="breadcrumb">
+  <a routerLink="/reguas">Régua de Cobrança</a>
+  <span>›</span>
+  <span class="current">Tipos de Ação</span>
+</div>
+
+<div class="page-header">
+  <h1 class="page-title">Tipos de Ação</h1>
+</div>
+
+<div class="card">
+  <p class="cell-muted" style="padding: 12px 16px 0;">
+    Catálogo somente leitura — cadastro mantido pelo time de Protheus (ADVPL), não editável por aqui.
+  </p>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Descrição</th>
+          <th>Canal</th>
+          <th>Função ADVPL</th>
+          <th>Tipo</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          <tr><td colspan="5"><div class="empty-state">Carregando tipos de ação...</div></td></tr>
+        } @else if (error()) {
+          <tr><td colspan="5"><div class="empty-state">{{ error() }}</div></td></tr>
+        } @else if (!tipos().length) {
+          <tr><td colspan="5"><div class="empty-state">Nenhum tipo de ação cadastrado.</div></td></tr>
+        } @else {
+          @for (t of tipos(); track t.codigo) {
+            <tr>
+              <td class="cell-strong">{{ t.codigo }}</td>
+              <td>{{ t.descricao }}</td>
+              <td>{{ t.canal }}</td>
+              <td class="cell-mono">{{ t.funcao }}</td>
+              <td>{{ t.tipo }}</td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+  <div class="pagination">
+    <span class="pagination-info">Exibindo 1 a {{ tipos().length }} de {{ tipos().length }} registros</span>
+    <div class="pagination-controls">
+      <button class="page-btn" disabled>‹</button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn" disabled>›</button>
+    </div>
+  </div>
+</div>

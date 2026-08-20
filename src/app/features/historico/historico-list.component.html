@@ -1,0 +1,220 @@
+<div class="breadcrumb">
+  <a routerLink="/reguas">Régua de Cobrança</a>
+  <span>›</span>
+  <span class="current">Histórico / Execuções</span>
+</div>
+
+<div class="page-header">
+  <h1 class="page-title">Histórico / Execuções</h1>
+  <!-- <button class="btn btn-primary" (click)="abrirRegistro()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+    Registrar Contato Manual
+  </button> -->
+</div>
+
+<div class="card">
+  <div class="hist-filters">
+    <div class="form-field">
+      <label>Código do Cliente</label>
+      <input type="text" placeholder="Ex: 150807" [ngModel]="codCliente()" (ngModelChange)="codCliente.set($event)" (keydown.enter)="buscar()" />
+    </div>
+    <div class="form-field">
+      <label>Régua</label>
+      <select [ngModel]="reguaFiltro()" (ngModelChange)="reguaFiltro.set($event)">
+        <option value="todas">Todas</option>
+        @for (r of reguas(); track r.codigo) { <option [value]="r.codigo">{{ r.codigo }} - {{ r.descricao }}</option> }
+      </select>
+    </div>
+    <div class="form-field">
+      <label>Status</label>
+      <select [ngModel]="statusFiltro()" (ngModelChange)="statusFiltro.set($event)">
+        <option value="todos">Todos</option>
+        @for (s of statusOptions; track s) { <option [value]="s">{{ statusLabel(s) }}</option> }
+      </select>
+    </div>
+    <div class="form-field">
+      <button class="btn btn-primary" (click)="buscar()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Buscar
+      </button>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Data / Hora</th>
+          <th>Régua</th>
+          <th>Etapa / Ação</th>
+          <th>Canal</th>
+          <th>Destino</th>
+          <th>Status</th>
+          <th>Usuário</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          <tr><td colspan="8"><div class="empty-state">Carregando histórico...</div></td></tr>
+        } @else if (error()) {
+          <tr><td colspan="8"><div class="empty-state">{{ error() }}</div></td></tr>
+        } @else if (!searched()) {
+          <tr><td colspan="8"><div class="empty-state">Informe o código do cliente e clique em Buscar para consultar o histórico.</div></td></tr>
+        } @else {
+          @for (it of items(); track it.sequencia + it.dataExecucao) {
+            <tr>
+              <td class="cell-mono">{{ formatDate(it.dataExecucao) }}</td>
+              <td class="cell-strong">{{ it.codRegua }}</td>
+              <td>Etapa {{ it.seqEtapa }} · Ação {{ it.seqAcao }} <span class="cell-muted">({{ it.tipoAcao }})</span></td>
+              <td>{{ it.canal }}</td>
+              <td class="cell-muted">{{ it.destino || '—' }}</td>
+              <td><span class="badge" [class]="statusBadge(it.status)">{{ statusLabel(it.status) }}</span></td>
+              <td class="cell-muted">{{ it.usuario || '—' }}</td>
+              <td>
+                <div class="row-actions">
+                  <button class="icon-btn" (click)="abrirDetalhe(it)" aria-label="Ver detalhes">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (!items().length) {
+            <tr><td colspan="8"><div class="empty-state">Nenhum registro encontrado para este cliente com os filtros informados.</div></td></tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (searched() && !loading() && !error()) {
+    <div class="pagination">
+      <span class="pagination-info">Exibindo {{ items().length ? (page()-1)*pageSize + 1 : 0 }} a {{ (page()-1)*pageSize + items().length }} de {{ totalItems() }} registros</span>
+      <div class="pagination-controls">
+        <button class="page-btn" [disabled]="page() === 1" (click)="goToPage(page()-1)">‹</button>
+        @for (p of [].constructor(totalPages()); track $index) {
+          <button class="page-btn" [class.active]="page() === $index+1" (click)="goToPage($index+1)">{{ $index+1 }}</button>
+        }
+        <button class="page-btn" [disabled]="page() === totalPages()" (click)="goToPage(page()+1)">›</button>
+      </div>
+    </div>
+  }
+</div>
+
+@if (detalhe(); as d) {
+  <app-modal title="Detalhes do Registro" width="620px" (close)="fecharDetalhe()">
+    <div class="detail-grid">
+      <div><span>Cliente</span><strong>{{ d.codCliente }}{{ d.loja ? ' / Loja ' + d.loja : '' }}</strong></div>
+      <div><span>Régua</span><strong>{{ d.codRegua }}</strong></div>
+      <div><span>Etapa / Ação</span><strong>Etapa {{ d.seqEtapa }} · Ação {{ d.seqAcao }} ({{ d.tipoAcao }})</strong></div>
+      <div><span>Canal</span><strong>{{ d.canal }}</strong></div>
+      <div><span>Status</span><strong>{{ statusLabel(d.status) }}</strong></div>
+      <div><span>Destino</span><strong>{{ d.destino || '—' }}</strong></div>
+      <div><span>Data de Execução</span><strong>{{ formatDate(d.dataExecucao) }}</strong></div>
+      <div><span>Hora</span><strong>{{ formatDate(d.hora) }}</strong></div>
+      <div><span>Usuário</span><strong>{{ d.usuario || '—' }}</strong></div>
+      <div><span>Data da Promessa</span><strong>{{ d.dataPromessa ? formatDate(d.dataPromessa) : '—' }}</strong></div>
+      @if (d.prefixo || d.numTitulo || d.parcela || d.tipoTitulo) {
+        <div class="full"><span>Título</span><strong>{{ d.prefixo }} {{ d.numTitulo }}{{ d.parcela ? '/' + d.parcela : '' }} {{ d.tipoTitulo }}</strong></div>
+      }
+      <div class="full"><span>Retorno</span><strong class="obs-text">{{ d.retorno || '—' }}</strong></div>
+      <div class="full"><span>Observação</span><strong class="obs-text">{{ d.observacao || '—' }}</strong></div>
+    </div>
+    <div modal-footer>
+      <button class="btn btn-primary" (click)="fecharDetalhe()">Fechar</button>
+    </div>
+  </app-modal>
+}
+
+@if (showRegistro()) {
+  <app-modal title="Registrar Contato Manual" width="680px" (close)="fecharRegistro()">
+    <span class="hint" style="display:block; margin-bottom: 14px;">
+      Use para registrar um contato feito diretamente pelo operador (ex: ligação telefônica) fora do disparo automático da régua.
+    </span>
+    @if (registerErrors().length) {
+      <div class="empty-state register-error-banner">
+        <ul class="error-list">
+          @for (msg of registerErrors(); track msg) { <li>{{ msg }}</li> }
+        </ul>
+      </div>
+    }
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Código do Cliente</label>
+        <input type="text" [(ngModel)]="registroForm.codCliente" placeholder="Ex: 150807" [class.invalid]="fieldError('codCliente')" />
+        @if (fieldError('codCliente'); as msg) { <span class="field-error">{{ msg }}</span> }
+      </div>
+      <div class="form-field">
+        <label>Loja</label>
+        <input type="text" [(ngModel)]="registroForm.loja" placeholder="Opcional" [class.invalid]="fieldError('loja')" />
+        @if (fieldError('loja'); as msg) { <span class="field-error">{{ msg }}</span> }
+      </div>
+      <div class="form-field">
+        <label>Régua</label>
+        <select [(ngModel)]="registroForm.codRegua" [class.invalid]="fieldError('codRegua')">
+          @for (r of reguas(); track r.codigo) { <option [value]="r.codigo">{{ r.codigo }} - {{ r.descricao }}</option> }
+        </select>
+        @if (fieldError('codRegua'); as msg) { <span class="field-error">{{ msg }}</span> }
+      </div>
+      <div class="form-field">
+        <label>Sequência da Etapa</label>
+        <input type="text" [(ngModel)]="registroForm.seqEtapa" placeholder="Ex: 001" [class.invalid]="fieldError('seqEtapa')" />
+        @if (fieldError('seqEtapa'); as msg) { <span class="field-error">{{ msg }}</span> }
+      </div>
+      <div class="form-field">
+        <label>Sequência da Ação</label>
+        <input type="text" [(ngModel)]="registroForm.seqAcao" placeholder="Ex: 001" [class.invalid]="fieldError('seqAcao')" />
+        @if (fieldError('seqAcao'); as msg) { <span class="field-error">{{ msg }}</span> }
+      </div>
+      <div class="form-field">
+        <label>Resultado do Contato</label>
+        <select [(ngModel)]="registroForm.status" [class.invalid]="fieldError('status')">
+          @for (o of registerStatusOptions; track o.value) { <option [value]="o.value">{{ o.label }}</option> }
+        </select>
+        @if (fieldError('status'); as msg) { <span class="field-error">{{ msg }}</span> }
+      </div>
+      @if (registroForm.status === 'PROMESSA') {
+        <div class="form-field">
+          <label>Data da Promessa</label>
+          <input type="date" [(ngModel)]="registroForm.dataPromessa" [class.invalid]="fieldError('dataPromessa')" />
+          @if (fieldError('dataPromessa'); as msg) { <span class="field-error">{{ msg }}</span> }
+        </div>
+      }
+      <div class="form-field">
+        <label>Destino (telefone/e-mail usado)</label>
+        <input type="text" [(ngModel)]="registroForm.destino" placeholder="Opcional" [class.invalid]="fieldError('destino')" />
+        @if (fieldError('destino'); as msg) { <span class="field-error">{{ msg }}</span> }
+      </div>
+      <div class="form-field full">
+        <label>Observação</label>
+        <textarea rows="3" [(ngModel)]="registroForm.observacao" placeholder="Detalhes do atendimento" [class.invalid]="fieldError('observacao')"></textarea>
+        @if (fieldError('observacao'); as msg) { <span class="field-error">{{ msg }}</span> }
+      </div>
+      <div class="form-field">
+        <label>Prefixo do Título</label>
+        <input type="text" [(ngModel)]="registroForm.prefixo" placeholder="Opcional" [class.invalid]="fieldError('prefixo')" />
+        @if (fieldError('prefixo'); as msg) { <span class="field-error">{{ msg }}</span> }
+      </div>
+      <div class="form-field">
+        <label>Nº do Título</label>
+        <input type="text" [(ngModel)]="registroForm.numTitulo" placeholder="Opcional" [class.invalid]="fieldError('numTitulo')" />
+        @if (fieldError('numTitulo'); as msg) { <span class="field-error">{{ msg }}</span> }
+      </div>
+      <div class="form-field">
+        <label>Parcela</label>
+        <input type="text" [(ngModel)]="registroForm.parcela" placeholder="Opcional" [class.invalid]="fieldError('parcela')" />
+        @if (fieldError('parcela'); as msg) { <span class="field-error">{{ msg }}</span> }
+      </div>
+      <div class="form-field">
+        <label>Tipo do Título</label>
+        <input type="text" [(ngModel)]="registroForm.tipoTitulo" placeholder="Opcional" [class.invalid]="fieldError('tipoTitulo')" />
+        @if (fieldError('tipoTitulo'); as msg) { <span class="field-error">{{ msg }}</span> }
+      </div>
+    </div>
+    <div modal-footer>
+      <button class="btn btn-ghost" (click)="fecharRegistro()" [disabled]="registering()">Cancelar</button>
+      <button class="btn btn-primary" (click)="registrar()" [disabled]="registering()">{{ registering() ? 'Registrando...' : 'Registrar Contato' }}</button>
+    </div>
+  </app-modal>
+}

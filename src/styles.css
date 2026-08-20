@@ -1,0 +1,404 @@
+/* ===== NEXA Régua de Cobrança - Global Theme ===== */
+:root {
+  --navy-900: #0f1730;
+  --navy-800: #141c3a;
+  --navy-700: #1a2444;
+  --navy-600: #22305c;
+  --navy-border: #2a3660;
+  --primary: #6c5ce7;
+  --primary-dark: #5a48d8;
+  --primary-light: #efe9ff;
+  --bg-page: #f4f5fa;
+  --bg-card: #ffffff;
+  --text-main: #1e2433;
+  --text-muted: #6b7280;
+  --text-soft: #9096a8;
+  --border: #e6e8f0;
+  --green: #16a34a;
+  --green-bg: #e7f8ee;
+  --red: #dc2626;
+  --red-bg: #fdeaea;
+  --amber: #d97706;
+  --amber-bg: #fdf1de;
+  --blue: #2563eb;
+  --blue-bg: #e8f0fe;
+  --radius: 10px;
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, .06);
+  --shadow-md: 0 4px 16px rgba(16, 24, 40, .08);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-page);
+  color: var(--text-main);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, p { margin: 0; }
+
+a { color: inherit; text-decoration: none; }
+
+button { font-family: inherit; cursor: pointer; }
+
+/* ===== Layout helpers ===== */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-soft);
+  margin-bottom: 10px;
+}
+
+.breadcrumb a { color: var(--text-soft); }
+.breadcrumb a:hover { color: var(--primary); }
+.breadcrumb .current { color: var(--text-main); font-weight: 500; }
+
+/* ===== Buttons ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  transition: all .15s ease;
+  white-space: nowrap;
+}
+
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dark); }
+
+.btn-outline { background: #fff; color: var(--text-main); border-color: var(--border); }
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+.btn-ghost { background: transparent; color: var(--text-muted); }
+.btn-ghost:hover { background: var(--bg-page); }
+
+.btn-danger { background: var(--red); color: #fff; }
+.btn-danger:hover { background: #b91c1c; }
+
+.btn-sm { padding: 6px 12px; font-size: 13px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ===== Card / Panel ===== */
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.card-pad { padding: 20px 24px; }
+
+/* ===== Toolbar (search + filters) ===== */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  min-width: 280px;
+  flex: 1;
+  max-width: 420px;
+}
+
+.search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+.search-box svg { flex-shrink: 0; color: var(--text-soft); }
+
+.select-input, .text-input, select, input[type="text"], input[type="number"], input[type="date"], input[type="time"], textarea {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 14px;
+  color: var(--text-main);
+  background: #fff;
+  outline: none;
+  font-family: inherit;
+}
+
+.select-input:focus, .text-input:focus, select:focus, input:focus, textarea:focus {
+  border-color: var(--primary);
+}
+
+/* ===== Table ===== */
+.table-wrap { overflow-x: auto; }
+
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.data-table thead th {
+  text-align: left;
+  padding: 12px 20px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: #fafbfd;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.data-table tbody td {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover { background: #fafbff; }
+
+.cell-strong { font-weight: 600; }
+.cell-muted { color: var(--text-muted); }
+
+/* ===== Badges / Pills ===== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.badge-green { background: var(--green-bg); color: var(--green); }
+.badge-red { background: var(--red-bg); color: var(--red); }
+.badge-amber { background: var(--amber-bg); color: var(--amber); }
+.badge-blue { background: var(--blue-bg); color: var(--blue); }
+.badge-gray { background: #eef0f5; color: var(--text-muted); }
+
+/* ===== Row actions ===== */
+.row-actions { display: flex; align-items: center; gap: 4px; }
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-soft);
+}
+
+.icon-btn:hover { background: var(--bg-page); color: var(--primary); }
+.icon-btn.danger:hover { color: var(--red); }
+
+/* ===== Pagination ===== */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pagination-info { color: var(--text-muted); font-size: 13px; }
+
+.pagination-controls { display: flex; align-items: center; gap: 6px; }
+
+.page-btn {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.page-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.page-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.page-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ===== Tabs ===== */
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tab-item {
+  padding: 14px 6px;
+  margin-right: 22px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-soft);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+
+.tab-item.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+/* ===== Forms ===== */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 20px;
+}
+
+.form-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.form-field { display: flex; flex-direction: column; gap: 6px; }
+.form-field.full { grid-column: 1 / -1; }
+.form-field label { font-size: 13px; font-weight: 600; color: var(--text-main); }
+.form-field .hint { font-size: 12px; color: var(--text-soft); }
+.form-field .checkbox-row { display: flex; align-items: center; gap: 8px; }
+
+/* ===== Empty state ===== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--text-soft);
+  gap: 8px;
+  text-align: center;
+}
+
+.etapa-sub { font-size: 14px; font-weight: 500; color: var(--text-muted); }
+
+.cell-mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; font-size: 12.5px; color: var(--text-muted); }
+
+.check-yes { color: var(--green); font-weight: 700; }
+.check-no { color: var(--text-soft); }
+
+.link-cell { color: var(--primary); font-weight: 600; }
+.link-cell:hover { text-decoration: underline; }
+
+.section-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+
+.config-hint { margin-top: 18px; font-size: 13px; color: var(--text-muted); }
+.config-hint a { color: var(--primary); font-weight: 600; }
+
+/* ===== Generic dropdowns / kebab menus (reused across feature pages) ===== */
+.menu-wrap, .filtros-wrap { position: relative; }
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+  min-width: 200px;
+  z-index: 60;
+  overflow: hidden;
+}
+
+/* Menus de ação dentro de tabelas com scroll horizontal (.table-wrap { overflow-x: auto })
+ * não podem usar position: absolute — o ancestral com overflow os corta/esconde.
+ * position: fixed escapa desse clipping; top/left são calculados em JS a partir do botão
+ * que abriu o menu (ver toggleMenu nos componentes de lista). */
+.dropdown-fixed {
+  position: fixed;
+  right: auto;
+  z-index: 1000;
+  /* top/left vêm de [style.top.px]/[style.left.px], calculados em JS */
+}
+
+.filtros-dropdown {
+  min-width: 240px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dropdown-header {
+  padding: 12px 16px;
+  font-weight: 700;
+  font-size: 13.5px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-main);
+}
+
+.dropdown-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.dropdown-item:last-child { border-bottom: none; }
+.dropdown-item strong { font-size: 13px; color: var(--text-main); }
+.dropdown-item span { font-size: 12px; color: var(--text-muted); }
+
+.dropdown-link {
+  display: block;
+  padding: 10px 16px;
+  font-size: 13px;
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border);
+}
+
+.dropdown-link:last-child { border-bottom: none; }
+.dropdown-link:hover { background: var(--bg-page); color: var(--primary); }
+.dropdown-link.danger { color: var(--red); }
+.dropdown-link.danger:hover { background: var(--red-bg); color: var(--red); }
+
+.action-menu { min-width: 190px; }
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #d3d7e3; border-radius: 8px; }
+::-webkit-scrollbar-track { background: transparent; }

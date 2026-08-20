@@ -1,0 +1,193 @@
+@if (regua(); as r) {
+  <div class="breadcrumb">
+    <a routerLink="/reguas">Régua de Cobrança</a>
+    <span>›</span>
+    <a routerLink="/reguas">Etapas da Régua</a>
+    <span>›</span>
+    <span class="current">{{ r.codigo }} - {{ r.descricao }}</span>
+  </div>
+
+  <div class="page-header">
+    <h1 class="page-title">
+      Etapas da Régua - {{ r.codigo }}
+      <span class="badge" [class.badge-green]="r.ativa" [class.badge-red]="!r.ativa">{{ r.ativa ? 'Ativa' : 'Inativa' }}</span>
+    </h1>
+    <button class="btn btn-primary" (click)="openNew()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      Nova Etapa
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="tabs">
+      <div class="tab-item" [class.active]="tab() === 'geral'" (click)="tab.set('geral')">Visão Geral</div>
+      <div class="tab-item" [class.active]="tab() === 'config'" (click)="tab.set('config')">Configurações</div>
+    </div>
+
+    @if (tab() === 'geral') {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Sequência</th>
+              <th>Dia(s) para acionamento</th>
+              <th>Etapa</th>
+              <th>Canal Padrão</th>
+              <th>Tipo de Ação Padrão</th>
+              <th>Template Padrão</th>
+              <th>Horário</th>
+              <th>Ativa</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (loading()) {
+              <tr><td colspan="9"><div class="empty-state">Carregando etapas...</div></td></tr>
+            } @else if (error()) {
+              <tr><td colspan="9"><div class="empty-state">{{ error() }}</div></td></tr>
+            } @else {
+              @for (e of etapas(); track e.seq) {
+                <tr>
+                  <td class="cell-strong">{{ e.seq }}</td>
+                  <td>{{ diaLabel(e.diaRelativo) }}</td>
+                  <td>
+                    <a class="link-cell" [routerLink]="['/reguas', codigo, 'etapas', e.seq, 'acoes']">{{ stepLabel(e) }}</a>
+                  </td>
+                  <td>{{ e.canal }}</td>
+                  <td>{{ e.tipoAcao }}</td>
+                  <td>{{ e.template }}</td>
+                  <td>{{ e.horaIni }} - {{ e.horaFim }}</td>
+                  <td>
+                    <span class="badge" [class.badge-green]="e.ativo" [class.badge-red]="!e.ativo">{{ e.ativo ? 'Sim' : 'Não' }}</span>
+                  </td>
+                  <td>
+                    <div class="row-actions">
+                      <button class="icon-btn" (click)="openEdit(e)" aria-label="Editar">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 20h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                      </button>
+                      <button class="icon-btn danger" (click)="remove(e)" aria-label="Excluir">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+              @if (!etapas().length) {
+                <tr><td colspan="9"><div class="empty-state">Nenhuma etapa cadastrada para esta régua.</div></td></tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span class="pagination-info">Exibindo 1 a {{ etapas().length }} de {{ etapas().length }} registros</span>
+        <div class="pagination-controls">
+          <button class="page-btn" disabled>‹</button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn" disabled>›</button>
+        </div>
+      </div>
+    } @else {
+      <div class="card-pad">
+        <h3 class="section-title">Configurações Gerais da Régua</h3>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Descrição</label>
+            <input type="text" [value]="r.descricao" disabled />
+          </div>
+          <div class="form-field">
+            <label>Prioridade</label>
+            <input type="text" [value]="r.prioridade" disabled />
+          </div>
+          <div class="form-field">
+            <label>Tipo de Cliente</label>
+            <input type="text" [value]="r.tipoCliente" disabled />
+          </div>
+          <div class="form-field">
+            <label>Faixa de Valor</label>
+            <input type="text" [value]="'R$ ' + r.valorMin.toFixed(2) + ' a R$ ' + r.valorMax.toFixed(2)" disabled />
+          </div>
+          <div class="form-field">
+            <label>Vigência</label>
+            <input type="text" [value]="r.dtInicio + ' a ' + r.dtFim" disabled />
+          </div>
+          <div class="form-field">
+            <label>Permite Jurídico / Bloqueio</label>
+            <input type="text" [value]="(r.permiteJuridico ? 'Jurídico: Sim' : 'Jurídico: Não') + ' · ' + (r.permiteBloqueio ? 'Bloqueio: Sim' : 'Bloqueio: Não')" disabled />
+          </div>
+          <div class="form-field full">
+            <label>Observações</label>
+            <textarea rows="3" disabled>{{ r.observacoes }}</textarea>
+          </div>
+        </div>
+        <p class="config-hint">Para alterar os dados cadastrais da régua, acesse <a routerLink="/reguas">Cadastro de Réguas</a>.</p>
+      </div>
+    }
+  </div>
+} @else if (loading()) {
+  <div class="empty-state">
+    <p>Carregando régua...</p>
+  </div>
+} @else {
+  <div class="empty-state">
+    <p>{{ error() || 'Régua não encontrada.' }}</p>
+    <a class="btn btn-primary" routerLink="/reguas">Voltar para Cadastro de Réguas</a>
+  </div>
+}
+
+@if (showModal()) {
+  <app-modal [title]="editingSeq ? 'Editar Etapa' : 'Nova Etapa'" width="680px" (close)="closeModal()">
+    @if (saveError()) {
+      <div class="empty-state" style="margin-bottom: 12px; color: #b3261e;">{{ saveError() }}</div>
+    }
+    <div class="form-grid">
+      @if (editingSeq) {
+        <div class="form-field">
+          <label>Sequência</label>
+          <input type="text" [value]="editingSeq" disabled />
+        </div>
+      }
+      <div class="form-field">
+        <label>Dia(s) para acionamento</label>
+        <input type="number" [(ngModel)]="form.diaRelativo" placeholder="Ex: 0, 5, -3" />
+      </div>
+      <div class="form-field">
+        <label>Canal Padrão</label>
+        <select [(ngModel)]="form.canal" (ngModelChange)="onCanalChange()">
+          @for (c of canaisDisponiveis(); track c) { <option [value]="c">{{ c }}</option> }
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Tipo de Ação Padrão</label>
+        <select [(ngModel)]="form.tipoAcao">
+          @for (t of tiposAcaoDoCanal(form.canal); track t.codigo) { <option [value]="t.codigo">{{ t.descricao }}</option> }
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Template Padrão</label>
+        <select [(ngModel)]="form.template">
+          @for (t of templatesDoCanal(form.canal); track t.codigo) { <option [value]="t.codigo">{{ t.codigo }} - {{ t.descricao }}</option> }
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Ativa</label>
+        <select [ngModel]="form.ativo ? 'sim' : 'nao'" (ngModelChange)="form.ativo = $event === 'sim'">
+          <option value="sim">Sim</option>
+          <option value="nao">Não</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Horário Inicial</label>
+        <input type="time" [(ngModel)]="form.horaIni" />
+      </div>
+      <div class="form-field">
+        <label>Horário Final</label>
+        <input type="time" [(ngModel)]="form.horaFim" />
+      </div>
+    </div>
+    <div modal-footer>
+      <button class="btn btn-ghost" (click)="closeModal()" [disabled]="saving()">Cancelar</button>
+      <button class="btn btn-primary" (click)="save()" [disabled]="saving()">{{ saving() ? 'Salvando...' : 'Salvar Etapa' }}</button>
+    </div>
+  </app-modal>
+}

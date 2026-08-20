@@ -1,0 +1,113 @@
+<div class="breadcrumb">
+  <a routerLink="/dashboard">Régua de Cobrança</a>
+  <span>›</span>
+  <span class="current">Configurações</span>
+</div>
+
+<div class="page-header">
+  <h1 class="page-title">Configurações</h1>
+  <button class="btn btn-primary" (click)="salvar()">Salvar Alterações</button>
+</div>
+
+<div class="card">
+  <div class="tabs">
+    <div class="tab-item" [class.active]="tab() === 'geral'" (click)="tab.set('geral')">Geral</div>
+    <div class="tab-item" [class.active]="tab() === 'integracoes'" (click)="tab.set('integracoes')">Integrações</div>
+    <div class="tab-item" [class.active]="tab() === 'usuarios'" (click)="tab.set('usuarios')">Usuários</div>
+  </div>
+
+  @if (tab() === 'geral') {
+    <div class="card-pad">
+      <h3 class="section-title">Dados Gerais</h3>
+      <div class="form-grid">
+        <div class="form-field full">
+          <label>Nome da Empresa</label>
+          <input type="text" [(ngModel)]="geral.nomeEmpresa" />
+        </div>
+        <div class="form-field">
+          <label>Horário Padrão Inicial</label>
+          <input type="time" [(ngModel)]="geral.horaIni" />
+        </div>
+        <div class="form-field">
+          <label>Horário Padrão Final</label>
+          <input type="time" [(ngModel)]="geral.horaFim" />
+        </div>
+        <div class="form-field full">
+          <label>Fuso Horário</label>
+          <select [(ngModel)]="geral.fusoHorario">
+            <option value="America/Sao_Paulo">America/Sao_Paulo (GMT-3)</option>
+            <option value="America/Manaus">America/Manaus (GMT-4)</option>
+          </select>
+        </div>
+      </div>
+
+      <h3 class="section-title toggle-section">Comportamento da Régua</h3>
+      <div class="toggle-list">
+        <label class="toggle-row">
+          <input type="checkbox" [(ngModel)]="geral.reenvioAutomatico" />
+          <div>
+            <strong>Reenvio automático em caso de falha</strong>
+            <span>Tenta reenviar a mensagem automaticamente após falha de entrega.</span>
+          </div>
+        </label>
+        <label class="toggle-row">
+          <input type="checkbox" [(ngModel)]="geral.notificarFalhas" />
+          <div>
+            <strong>Notificar administradores sobre falhas</strong>
+            <span>Envia notificação no sino de alertas quando uma execução falhar.</span>
+          </div>
+        </label>
+        <label class="toggle-row">
+          <input type="checkbox" [(ngModel)]="geral.pausarFeriados" />
+          <div>
+            <strong>Pausar disparos em feriados nacionais</strong>
+            <span>As réguas não disparam ações em feriados cadastrados no calendário.</span>
+          </div>
+        </label>
+      </div>
+    </div>
+  }
+
+  @if (tab() === 'integracoes') {
+    <div class="card-pad">
+      <h3 class="section-title">Integrações</h3>
+      <div class="integ-list">
+        @for (i of integracoes; track i.nome) {
+          <div class="integ-row">
+            <div class="integ-info">
+              <strong>{{ i.nome }}</strong>
+              <span>{{ i.detalhe }}</span>
+            </div>
+            <span class="badge" [class.badge-green]="i.status === 'Conectado'" [class.badge-red]="i.status !== 'Conectado'">{{ i.status }}</span>
+            <button class="btn btn-outline btn-sm">Configurar</button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (tab() === 'usuarios') {
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Ativo</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (u of usuarios; track u.email) {
+            <tr>
+              <td class="cell-strong">{{ u.nome }}</td>
+              <td class="cell-muted">{{ u.email }}</td>
+              <td>{{ u.perfil }}</td>
+              <td><span class="badge" [class.badge-green]="u.ativo" [class.badge-red]="!u.ativo">{{ u.ativo ? 'Sim' : 'Não' }}</span></td>
+              <td>
+                <button class="icon-btn" aria-label="Editar">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 20h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

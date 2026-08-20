@@ -1,0 +1,126 @@
+:host { display: block; }
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 20% 20%, var(--navy-700), var(--navy-900) 70%);
+  padding: 24px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--bg-card);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  padding: 36px 36px 28px;
+}
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.logo-mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 17px;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.logo-text strong { font-size: 15px; letter-spacing: .5px; color: var(--text-main); }
+.logo-text span { font-size: 10px; color: var(--text-soft); font-weight: 600; letter-spacing: .5px; }
+
+.login-title { font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 6px; }
+.login-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+
+.login-banner {
+  font-size: 12.5px;
+  border-radius: 8px;
+  padding: 10px 12px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.login-banner-warn {
+  background: #fff7e6;
+  color: #92600a;
+}
+
+.login-banner-error {
+  background: #fdecec;
+  color: #b3261e;
+}
+
+.login-form { display: flex; flex-direction: column; gap: 14px; }
+
+.form-field { display: flex; flex-direction: column; gap: 4px; }
+
+.login-form label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.login-form input {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: var(--text-main);
+  background: #fff;
+}
+
+.login-form input.invalid {
+  border-color: #d64545;
+}
+
+.password-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.password-field input { flex: 1; }
+
+.password-toggle {
+  border: none;
+  background: transparent;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 6px;
+  white-space: nowrap;
+}
+
+.field-error {
+  font-size: 11.5px;
+  color: #d64545;
+}
+
+.btn-block { width: 100%; justify-content: center; padding: 11px; font-size: 14px; margin-top: 4px; }
+
+.btn-block:disabled { opacity: .6; }
+
+.login-footnote {
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--text-soft);
+  margin-top: 20px;
+}

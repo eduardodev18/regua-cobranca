@@ -1,0 +1,133 @@
+@if (regua(); as r) {
+@if (etapa(); as e) {
+  <div class="breadcrumb">
+    <a routerLink="/reguas">Régua de Cobrança</a>
+    <span>›</span>
+    <a [routerLink]="['/reguas', codigo, 'etapas']">Ações da Etapa</a>
+    <span>›</span>
+    <span class="current">{{ r.codigo }} - Etapa {{ diaLabel(e.diaRelativo) }}</span>
+  </div>
+
+  <div class="page-header">
+    <h1 class="page-title">
+      Ações da Etapa - {{ r.codigo }}
+      <span class="etapa-sub">Etapa {{ diaLabel(e.diaRelativo) }} - {{ e.canal }} · {{ e.codAcao }}</span>
+      <span class="badge" [class.badge-green]="e.ativo === '1'" [class.badge-red]="e.ativo !== '1'">{{ e.ativo === '1' ? 'Ativa' : 'Inativa' }}</span>
+    </h1>
+    <button class="btn btn-primary" (click)="openNew()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      Nova Ação
+    </button>
+  </div>
+
+  <div class="card">
+    <p class="cell-muted" style="padding: 12px 16px 0;">
+      Ações extras opcionais — a etapa já dispara {{ e.canal }} · {{ e.codAcao }} sozinha; use isso só se precisar de mais um efeito no mesmo dia.
+    </p>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Seq. Ação</th>
+            <th>Tipo de Ação</th>
+            <th>Template</th>
+            <th>Prazo (dias)</th>
+            <th>Ativa</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (loading()) {
+            <tr><td colspan="6"><div class="empty-state">Carregando ações...</div></td></tr>
+          } @else if (error()) {
+            <tr><td colspan="6"><div class="empty-state">{{ error() }}</div></td></tr>
+          } @else {
+            @for (a of acoes(); track a.seqAcao) {
+              <tr>
+                <td class="cell-strong">{{ a.seqAcao }}</td>
+                <td>{{ tipoDescricao(a.tipo) }}</td>
+                <td>{{ a.template }}</td>
+                <td>{{ a.prazo }}</td>
+                <td>
+                  <span class="badge" [class.badge-green]="a.ativo" [class.badge-red]="!a.ativo">{{ a.ativo ? 'Sim' : 'Não' }}</span>
+                </td>
+                <td>
+                  <div class="row-actions">
+                    <button class="icon-btn" (click)="openEdit(a)" aria-label="Editar">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 20h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                    </button>
+                    <button class="icon-btn danger" (click)="remove(a)" aria-label="Excluir">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+            @if (!acoes().length) {
+              <tr><td colspan="6"><div class="empty-state">Nenhuma ação extra cadastrada para esta etapa.</div></td></tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <span class="pagination-info">Exibindo 1 a {{ acoes().length }} de {{ acoes().length }} registros</span>
+      <div class="pagination-controls">
+        <button class="page-btn" disabled>‹</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn" disabled>›</button>
+      </div>
+    </div>
+  </div>
+} @else if (!loading()) {
+  <div class="empty-state"><p>Etapa não encontrada.</p></div>
+}
+} @else if (!loading()) {
+  <div class="empty-state">
+    <p>{{ error() || 'Régua não encontrada.' }}</p>
+    <a class="btn btn-primary" routerLink="/reguas">Voltar para Cadastro de Réguas</a>
+  </div>
+}
+
+@if (showModal()) {
+  <app-modal [title]="editingSeqAcao ? 'Editar Ação' : 'Nova Ação'" width="680px" (close)="closeModal()">
+    @if (saveError()) {
+      <div class="empty-state" style="margin-bottom: 12px; color: #b3261e;">{{ saveError() }}</div>
+    }
+    <div class="form-grid">
+      @if (editingSeqAcao) {
+        <div class="form-field">
+          <label>Sequência</label>
+          <input type="text" [value]="editingSeqAcao" disabled />
+        </div>
+      }
+      <div class="form-field">
+        <label>Tipo de Ação</label>
+        <select [(ngModel)]="form.tipo" (ngModelChange)="onTipoChange()">
+          @for (t of tiposAcao(); track t.codigo) { <option [value]="t.codigo">{{ t.descricao }}</option> }
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Template</label>
+        <select [(ngModel)]="form.template">
+          @for (t of templatesDoTipo(form.tipo); track t.codigo) { <option [value]="t.codigo">{{ t.codigo }} - {{ t.descricao }}</option> }
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Prazo (dias)</label>
+        <input type="number" min="0" [(ngModel)]="form.prazo" placeholder="0 = sem prazo extra" />
+      </div>
+      <div class="form-field">
+        <label>Ativa</label>
+        <select [ngModel]="form.ativo ? 'sim' : 'nao'" (ngModelChange)="form.ativo = $event === 'sim'">
+          <option value="sim">Sim</option>
+          <option value="nao">Não</option>
+        </select>
+      </div>
+    </div>
+    <div modal-footer>
+      <button class="btn btn-ghost" (click)="closeModal()" [disabled]="saving()">Cancelar</button>
+      <button class="btn btn-primary" (click)="save()" [disabled]="saving()">{{ saving() ? 'Salvando...' : 'Salvar Ação' }}</button>
+    </div>
+  </app-modal>
+}

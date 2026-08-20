@@ -1,0 +1,241 @@
+<div class="breadcrumb">
+  <a routerLink="/reguas">Régua de Cobrança</a>
+  <span>›</span>
+  <a routerLink="/reguas">Réguas de Cobrança</a>
+  <span>›</span>
+  <span class="current">Cadastro</span>
+</div>
+
+<div class="page-header">
+  <h1 class="page-title">Cadastro de Réguas</h1>
+  <button class="btn btn-primary" (click)="openNew()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+    Nova Régua
+  </button>
+</div>
+
+<div class="card">
+  <div class="toolbar">
+    <div class="search-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <input type="text" placeholder="Buscar por código ou descrição..." [ngModel]="search()" (ngModelChange)="search.set($event); page.set(1)" />
+    </div>
+    <div class="filtros-wrap">
+      <button class="btn btn-outline" (click)="showFiltros.set(!showFiltros())">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Filtros
+      </button>
+      @if (showFiltros()) {
+        <div class="dropdown filtros-dropdown">
+          <div class="form-field">
+            <label>Status</label>
+            <select [ngModel]="filtroAtiva()" (ngModelChange)="filtroAtiva.set($event); page.set(1)">
+              <option value="todas">Todas</option>
+              <option value="sim">Ativas</option>
+              <option value="nao">Inativas</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Tipo Cliente</label>
+            <select [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event); page.set(1)">
+              <option value="todos">Todos</option>
+              <option value="PF">Pessoa Física</option>
+              <option value="PJ">Pessoa Jurídica</option>
+              <option value="Todos">Todos os Tipos</option>
+            </select>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Descrição</th>
+          <th>Tipo Cliente</th>
+          <th>Valor (Min)</th>
+          <th>Valor (Max)</th>
+          <th>Ativa</th>
+          <th>Prioridade</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          <tr><td colspan="8"><div class="empty-state">Carregando réguas...</div></td></tr>
+        } @else if (error()) {
+          <tr><td colspan="8"><div class="empty-state">{{ error() }}</div></td></tr>
+        } @else {
+          @for (r of paged(); track r.codigo) {
+            <tr>
+              <td class="cell-strong">{{ r.codigo }}</td>
+              <td>{{ r.descricao }}</td>
+              <td>{{ r.tipoCliente === 'PF' ? 'Pessoa Física' : r.tipoCliente === 'PJ' ? 'Pessoa Jurídica' : 'Todos' }}</td>
+              <td>{{ money(r.valorMin) }}</td>
+              <td>{{ money(r.valorMax) }}</td>
+              <td>
+                <span class="badge" [class.badge-green]="r.ativa" [class.badge-red]="!r.ativa">{{ r.ativa ? 'Sim' : 'Não' }}</span>
+              </td>
+              <td>{{ r.prioridade }}</td>
+              <td>
+                <div class="row-actions">
+                  <button class="icon-btn" (click)="openEdit(r)" aria-label="Editar">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 20h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                  </button>
+                  <div class="menu-wrap">
+                    <button class="icon-btn" (click)="toggleMenu(r.codigo, $event)" aria-label="Mais ações">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="19" r="1.6" fill="currentColor"/></svg>
+                    </button>
+                    @if (openMenuFor() === r.codigo && menuPos(); as pos) {
+                      <div class="dropdown action-menu dropdown-fixed" [style.top.px]="pos.top" [style.left.px]="pos.left">
+                        <a class="dropdown-link" [routerLink]="['/reguas', r.codigo, 'etapas']">Etapas da Régua</a>
+                        <a class="dropdown-link" (click)="toggleAtiva(r)">{{ r.ativa ? 'Desativar' : 'Ativar' }}</a>
+                        <a class="dropdown-link danger" (click)="remove(r)">Excluir</a>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (!paged().length) {
+            <tr><td colspan="8">
+              <div class="empty-state">Nenhuma régua encontrada.</div>
+            </td></tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    <span class="pagination-info">Exibindo {{ paged().length ? (page()-1)*pageSize + 1 : 0 }} a {{ (page()-1)*pageSize + paged().length }} de {{ filtered().length }} registros</span>
+    <div class="pagination-controls">
+      <button class="page-btn" [disabled]="page() === 1" (click)="goToPage(page()-1)">‹</button>
+      @for (p of [].constructor(totalPages()); track $index) {
+        <button class="page-btn" [class.active]="page() === $index+1" (click)="goToPage($index+1)">{{ $index+1 }}</button>
+      }
+      <button class="page-btn" [disabled]="page() === totalPages()" (click)="goToPage(page()+1)">›</button>
+    </div>
+  </div>
+</div>
+
+@if (showModal()) {
+  <app-modal [title]="editingCodigo ? 'Editar Régua' : 'Nova Régua'" width="720px" (close)="closeModal()">
+    @if (saveError()) {
+      <div class="empty-state" style="margin-bottom: 12px; color: #b3261e;">{{ saveError() }}</div>
+    }
+    <div class="form-grid">
+      @if (editingCodigo) {
+        <div class="form-field">
+          <label>Código</label>
+          <input type="text" [value]="editingCodigo" disabled />
+        </div>
+      }
+      <div class="form-field">
+        <label>Prioridade</label>
+        <input type="number" [(ngModel)]="form.prioridade" />
+      </div>
+      <div class="form-field full">
+        <label>Descrição</label>
+        <input type="text" [(ngModel)]="form.descricao" placeholder="Ex: Régua Pessoa Física - Até 5k" />
+      </div>
+      <div class="form-field">
+        <label>Tipo Cliente</label>
+        <select [(ngModel)]="form.tipoCliente">
+          <option value="PF">Pessoa Física</option>
+          <option value="PJ">Pessoa Jurídica</option>
+          <option value="Todos">Todos</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Ativa</label>
+        <select [ngModel]="form.ativa ? 'sim' : 'nao'" (ngModelChange)="form.ativa = $event === 'sim'">
+          <option value="sim">Sim</option>
+          <option value="nao">Não</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Valor Mínimo (R$)</label>
+        <input type="text" inputmode="decimal" [ngModel]="valorMinDisplay()" (ngModelChange)="onValorMinChange($event)" />
+      </div>
+      <div class="form-field">
+        <label>Valor Máximo (R$)</label>
+        <input type="text" inputmode="decimal" [ngModel]="valorMaxDisplay()" (ngModelChange)="onValorMaxChange($event)" />
+      </div>
+      <div class="form-field">
+        <label>Data Início</label>
+        <input type="date" [(ngModel)]="dtInicioPicker" />
+      </div>
+      <div class="form-field">
+        <label>Data Fim</label>
+        <input type="date" [(ngModel)]="dtFimPicker" />
+      </div>
+      <div class="form-field">
+        <label>Permite Jurídico</label>
+        <div class="checkbox-row">
+          <input type="checkbox" id="jurid" [(ngModel)]="form.permiteJuridico" />
+          <label for="jurid">Habilitar encaminhamento jurídico</label>
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Permite Bloqueio</label>
+        <div class="checkbox-row">
+          <input type="checkbox" id="bloq" [(ngModel)]="form.permiteBloqueio" />
+          <label for="bloq">Habilitar bloqueio de cliente</label>
+        </div>
+      </div>
+      <div class="form-field full">
+        <label>Observações</label>
+        <textarea rows="3" [(ngModel)]="form.observacoes"></textarea>
+      </div>
+    </div>
+
+    @if (!editingCodigo) {
+      <div class="form-grid" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+        <div class="form-field full">
+          <label>1ª Etapa da Régua</label>
+          <span class="hint">A API exige pelo menos uma etapa já na criação da régua. As demais etapas podem ser adicionadas depois, na tela de Etapas.</span>
+        </div>
+        <div class="form-field">
+          <label>Dia(s) para acionamento</label>
+          <input type="number" [(ngModel)]="primeiraEtapa.diaRelativo" placeholder="Ex: 0, 5, -3" />
+        </div>
+        <div class="form-field">
+          <label>Canal</label>
+          <select [(ngModel)]="primeiraEtapa.canal" (ngModelChange)="onPrimeiraEtapaCanalChange()">
+            @for (c of canaisDisponiveis(); track c) { <option [value]="c">{{ c }}</option> }
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Ação</label>
+          <select [(ngModel)]="primeiraEtapa.codAcao">
+            @for (t of tiposAcaoDoCanal(primeiraEtapa.canal); track t.codigo) { <option [value]="t.codigo">{{ t.descricao }}</option> }
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Template</label>
+          <select [(ngModel)]="primeiraEtapa.codTemplate">
+            @for (t of templatesDoCanal(primeiraEtapa.canal); track t.codigo) { <option [value]="t.codigo">{{ t.codigo }} - {{ t.descricao }}</option> }
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Hora Início</label>
+          <input type="text" [(ngModel)]="primeiraEtapa.horaInicio" placeholder="08:00" />
+        </div>
+        <div class="form-field">
+          <label>Hora Fim</label>
+          <input type="text" [(ngModel)]="primeiraEtapa.horaFim" placeholder="18:00" />
+        </div>
+      </div>
+    }
+
+    <div modal-footer>
+      <button class="btn btn-ghost" (click)="closeModal()" [disabled]="saving()">Cancelar</button>
+      <button class="btn btn-primary" (click)="save()" [disabled]="saving()">{{ saving() ? 'Salvando...' : 'Salvar Régua' }}</button>
+    </div>
+  </app-modal>
+}

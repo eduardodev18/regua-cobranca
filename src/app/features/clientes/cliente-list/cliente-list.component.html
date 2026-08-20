@@ -1,0 +1,96 @@
+<div class="breadcrumb">
+  <a routerLink="/dashboard">Régua de Cobrança</a>
+  <span>›</span>
+  <span class="current">Visão do Cliente</span>
+</div>
+
+<div class="page-header">
+  <h1 class="page-title">Visão do Cliente</h1>
+</div>
+
+<div class="card">
+  <div class="cli-filters">
+    <div class="form-field grow">
+      <label>Buscar</label>
+      <div class="search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input type="text" placeholder="Nome do cliente..." [ngModel]="search()" (ngModelChange)="search.set($event); resetPage()" />
+      </div>
+    </div>
+    <div class="form-field">
+      <label>Tipo</label>
+      <select [ngModel]="tipo()" (ngModelChange)="tipo.set($event); resetPage()">
+        <option value="todos">Todos</option>
+        <option value="PF">Pessoa Física</option>
+        <option value="PJ">Pessoa Jurídica</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label>&nbsp;</label>
+      <div class="checkbox-row">
+        <input type="checkbox" id="soAtraso" [ngModel]="soComAtraso()" (ngModelChange)="soComAtraso.set($event); resetPage()" />
+        <label for="soAtraso">Somente com atraso</label>
+      </div>
+    </div>
+    <div class="form-field limpar-wrap">
+      <label>&nbsp;</label>
+      <button class="btn btn-ghost btn-sm" (click)="limparFiltros()">Limpar filtros</button>
+    </div>
+  </div>
+
+  <div class="cli-summary">
+    <span><strong>{{ filtered().length }}</strong> cliente(s) encontrado(s)</span>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Tipo</th>
+          <th>Títulos em Aberto</th>
+          <th>Valor em Aberto</th>
+          <th>Régua(s)</th>
+          <th>Acionamentos</th>
+          <th>Último Acionamento</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (c of paged(); track c.cliente) {
+          <tr>
+            <td class="cell-strong">
+              {{ c.cliente }}
+              @if (c.temAtraso) { <span class="badge badge-red atraso-badge">Em atraso</span> }
+            </td>
+            <td>{{ c.tipo === 'PJ' ? 'Pessoa Jurídica' : 'Pessoa Física' }}</td>
+            <td>{{ c.qtdTitulosAberto }}</td>
+            <td class="cell-strong">R$ {{ money(c.valorEmAberto) }}</td>
+            <td class="cell-muted">{{ c.reguas.join(', ') || '—' }}</td>
+            <td>{{ c.qtdAcionamentos }}</td>
+            <td class="cell-muted">{{ c.ultimoAcionamento || '—' }}</td>
+            <td>
+              <a class="icon-btn" [routerLink]="['/clientes', c.cliente]" aria-label="Ver cliente">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+              </a>
+            </td>
+          </tr>
+        }
+        @if (!paged().length) {
+          <tr><td colspan="8"><div class="empty-state">Nenhum cliente encontrado para os filtros selecionados.</div></td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    <span class="pagination-info">Exibindo {{ paged().length ? (page()-1)*pageSize + 1 : 0 }} a {{ (page()-1)*pageSize + paged().length }} de {{ filtered().length }} registros</span>
+    <div class="pagination-controls">
+      <button class="page-btn" [disabled]="page() === 1" (click)="goToPage(page()-1)">‹</button>
+      @for (p of [].constructor(totalPages()); track $index) {
+        <button class="page-btn" [class.active]="page() === $index+1" (click)="goToPage($index+1)">{{ $index+1 }}</button>
+      }
+      <button class="page-btn" [disabled]="page() === totalPages()" (click)="goToPage(page()+1)">›</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,66 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="logo-mark">N</div>
+      <div class="logo-text">
+        <strong>NEXA</strong>
+        <span>RÉGUA DE COBRANÇA</span>
+      </div>
+    </div>
+
+    <h1 class="login-title">Entrar na plataforma</h1>
+    <p class="login-subtitle">Informe seu CNPJ e senha para acessar. Seu perfil de acesso é definido automaticamente após o login.</p>
+
+    @if (sessionExpired()) {
+      <div class="login-banner login-banner-warn">Sua sessão expirou. Faça login novamente para continuar.</div>
+    }
+
+    @if (error()) {
+      <div class="login-banner login-banner-error">{{ error() }}</div>
+    }
+
+    <form class="login-form" (ngSubmit)="onSubmit()">
+      <div class="form-field">
+        <label>CNPJ</label>
+        <input
+          type="text"
+          inputmode="numeric"
+          placeholder="00.000.000/0000-00"
+          [ngModel]="cnpj()"
+          (ngModelChange)="onCnpjChange($event)"
+          name="cnpj"
+          [class.invalid]="touched() && cnpjInvalido"
+        />
+        @if (touched() && cnpjInvalido) {
+          <span class="field-error">Informe um CNPJ válido (14 dígitos).</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label>Senha</label>
+        <div class="password-field">
+          <input
+            [type]="showPassword() ? 'text' : 'password'"
+            placeholder="••••••••"
+            [ngModel]="senha()"
+            (ngModelChange)="senha.set($event)"
+            name="senha"
+            [class.invalid]="touched() && senhaInvalida"
+          />
+          <button type="button" class="password-toggle" (click)="togglePassword()">
+            {{ showPassword() ? 'Ocultar' : 'Mostrar' }}
+          </button>
+        </div>
+        @if (touched() && senhaInvalida) {
+          <span class="field-error">A senha deve ter pelo menos 6 caracteres.</span>
+        }
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="loading()">
+        {{ loading() ? 'Entrando...' : 'Entrar' }}
+      </button>
+    </form>
+
+    <p class="login-footnote">Não tem cadastro? Fale com o administrador da sua conta.</p>
+  </div>
+</div>

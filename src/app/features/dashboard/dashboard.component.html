@@ -1,0 +1,285 @@
+<div class="breadcrumb">
+  <span class="current">Régua de Cobrança</span>
+</div>
+
+<div class="page-header">
+  <h1 class="page-title">Dashboard</h1>
+  <div class="header-actions">
+    <button class="btn btn-outline" (click)="showFiltros.set(!showFiltros())">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      Filtros
+      @if (hasFiltrosAtivos()) { <span class="filtro-dot"></span> }
+    </button>
+    <a class="btn btn-primary" routerLink="/reguas">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      Nova Régua
+    </a>
+  </div>
+</div>
+
+@if (showFiltros()) {
+  <div class="card filtros-card">
+    <div class="filtros-grid">
+      <div class="form-field">
+        <label>Período de</label>
+        <input type="text" [ngModel]="periodoDe()" (ngModelChange)="periodoDe.set($event)" placeholder="dd/mm/aaaa" />
+      </div>
+      <div class="form-field">
+        <label>Período até</label>
+        <input type="text" [ngModel]="periodoAte()" (ngModelChange)="periodoAte.set($event)" placeholder="dd/mm/aaaa" />
+      </div>
+      <div class="form-field">
+        <label>Empresa / Filial</label>
+        <select [ngModel]="filial()" (ngModelChange)="filial.set($event)">
+          <option value="todas">Todas</option>
+          @for (f of filiais; track f) { <option [value]="f">{{ f }}</option> }
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Unidade de Negócio</label>
+        <select [ngModel]="unidadeNegocio()" (ngModelChange)="unidadeNegocio.set($event)">
+          <option value="todas">Todas</option>
+          @for (u of unidadesNegocio; track u) { <option [value]="u">{{ u }}</option> }
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Responsável</label>
+        <select [ngModel]="responsavel()" (ngModelChange)="responsavel.set($event)">
+          <option value="todos">Todos</option>
+          @for (r of responsaveis; track r) { <option [value]="r">{{ r }}</option> }
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Faixa de Valor (R$)</label>
+        <div class="period-row">
+          <input type="number" [ngModel]="valorMin()" (ngModelChange)="valorMin.set($event)" placeholder="Mín." />
+          <span>-</span>
+          <input type="number" [ngModel]="valorMax()" (ngModelChange)="valorMax.set($event)" placeholder="Máx." />
+        </div>
+      </div>
+    </div>
+    @if (hasFiltrosAtivos()) {
+      <div class="filtros-footer">
+        <button class="btn btn-ghost btn-sm" (click)="limparFiltros()">Limpar filtros</button>
+      </div>
+    }
+  </div>
+}
+
+<div class="kpi-grid">
+  <a class="card kpi-card kpi-clickable" routerLink="/reguas">
+    <div class="kpi-icon kpi-blue">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </div>
+    <div class="kpi-body">
+      <span class="kpi-label">Réguas Ativas</span>
+      <strong class="kpi-value">{{ kpis().reguasAtivas }}<span class="kpi-of">/ {{ kpis().totalReguas }}</span></strong>
+    </div>
+  </a>
+
+  <div class="card kpi-card kpi-clickable" (click)="irParaHistorico()">
+    <div class="kpi-icon kpi-purple">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="kpi-body">
+      <span class="kpi-label">Execuções Hoje</span>
+      <strong class="kpi-value">{{ kpis().execucoesHoje }}</strong>
+    </div>
+  </div>
+
+  <div class="card kpi-card kpi-clickable" (click)="irParaHistorico()">
+    <div class="kpi-icon kpi-green">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="kpi-body">
+      <span class="kpi-label">Taxa de Sucesso</span>
+      <strong class="kpi-value">{{ kpis().taxaSucesso }}%</strong>
+    </div>
+  </div>
+
+  <div class="card kpi-card kpi-clickable" (click)="irParaTitulos({ status: 'Em aberto' })">
+    <div class="kpi-icon kpi-amber">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="1.8"/><path d="M2.5 20c.7-3.6 3.4-6 6.5-6s5.8 2.4 6.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="17.5" cy="9" r="2.6" stroke="currentColor" stroke-width="1.6"/><path d="M15.7 12.4c2.6.3 4.6 2.5 5.1 5.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </div>
+    <div class="kpi-body">
+      <span class="kpi-label">Clientes em Cobrança</span>
+      <strong class="kpi-value">{{ kpis().clientesEmCobranca }}</strong>
+    </div>
+  </div>
+</div>
+
+<h2 class="section-heading">KPIs Financeiros</h2>
+
+<div class="kpi-grid kpi-grid-fin">
+  <div class="card kpi-card kpi-clickable" (click)="irParaTitulos({ status: 'Em aberto' })">
+    <div class="kpi-icon kpi-blue">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M2 10h20" stroke="currentColor" stroke-width="1.8"/></svg>
+    </div>
+    <div class="kpi-body">
+      <span class="kpi-label">Carteira em Aberto</span>
+      <strong class="kpi-value kpi-money">R$ {{ money(carteiraKpis().carteiraEmAberto) }}</strong>
+      <span class="kpi-sub">{{ carteiraKpis().totalTitulosAbertos }} título(s) em aberto</span>
+    </div>
+  </div>
+
+  <div class="card kpi-card kpi-clickable" (click)="irParaTitulos({ status: 'Pago' })">
+    <div class="kpi-icon kpi-green">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M17 6H9.5a3 3 0 000 6h5a3 3 0 010 6H6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </div>
+    <div class="kpi-body">
+      <span class="kpi-label">Valor Recuperado no Período</span>
+      <strong class="kpi-value kpi-money">R$ {{ money(carteiraKpis().valorRecuperado) }}</strong>
+      <span class="kpi-sub">{{ carteiraKpis().percentualRecuperado }}% da carteira · últimos {{ carteiraKpis().periodoDias }} dias</span>
+    </div>
+  </div>
+
+  <div class="card kpi-card kpi-clickable" (click)="irParaTitulos({ status: 'Em aberto' })">
+    <div class="kpi-icon kpi-amber">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="1.8"/><path d="M2.5 20c.7-3.6 3.4-6 6.5-6s5.8 2.4 6.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="17.5" cy="9" r="2.6" stroke="currentColor" stroke-width="1.6"/><path d="M15.7 12.4c2.6.3 4.6 2.5 5.1 5.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </div>
+    <div class="kpi-body">
+      <span class="kpi-label">Quantidade de Clientes</span>
+      <strong class="kpi-value">{{ carteiraKpis().quantidadeClientes }}</strong>
+      <span class="kpi-sub">com título em aberto</span>
+    </div>
+  </div>
+</div>
+
+<div class="card card-pad aging-card">
+  <h3 class="section-title">Aging da Carteira</h3>
+  <div class="aging-list">
+    @for (a of agingList(); track a.label) {
+      <button class="aging-row" (click)="irParaTitulos({ status: 'Em aberto', aging: a.bucket })">
+        <span class="aging-label">{{ a.label }}</span>
+        <div class="bar-track"><div class="bar-fill" [style.width.%]="a.pct" [style.background]="a.color"></div></div>
+        <span class="aging-value">R$ {{ money(a.valor) }}</span>
+        <span class="aging-qtd">{{ a.qtd }} título(s)</span>
+      </button>
+    }
+  </div>
+</div>
+
+<div class="dash-grid">
+  <div class="card card-pad">
+    <h3 class="section-title">Execuções por Canal</h3>
+    <div class="bar-list">
+      @for (c of canaisResumo(); track c.canal) {
+        <div class="bar-row">
+          <span class="bar-label">{{ c.canal }}</span>
+          <div class="bar-track"><div class="bar-fill" [style.width.%]="c.pct"></div></div>
+          <span class="bar-value">{{ c.count }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="card card-pad">
+    <h3 class="section-title">Funil de Cobrança</h3>
+    <div class="funil-list">
+      @for (e of funil(); track e.etapa; let i = $index) {
+        <div class="funil-row">
+          <div class="funil-bar-wrap">
+            <div class="funil-bar" [style.width.%]="e.pctDoTopo < 8 ? 8 : e.pctDoTopo">
+              <span class="funil-etapa">{{ e.etapa }}</span>
+              <span class="funil-valor">{{ e.valor }}</span>
+            </div>
+          </div>
+          <span class="funil-conv">{{ i === 0 ? '100%' : (e.pctDoAnterior + '% da etapa anterior') }}</span>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<h2 class="section-heading">Execuções do Motor de Cobrança</h2>
+
+<div class="card motor-card">
+  <div class="motor-header">
+    <span class="badge" [ngClass]="motorBadgeClass(motorStatus().statusGeral)">{{ motorLabel(motorStatus().statusGeral) }}</span>
+    <span class="motor-sync">Última sincronização com o Protheus: <strong>{{ motorStatus().ultimaSincronizacaoProtheus }}</strong> (há {{ motorStatus().minutosDesdeSincronizacao }} min)</span>
+  </div>
+  <div class="motor-grid">
+    <div class="motor-stat">
+      <span class="motor-stat-label">Agendadas Hoje</span>
+      <strong class="motor-stat-value">{{ motorStatus().agendadasHoje }}</strong>
+    </div>
+    <div class="motor-stat">
+      <span class="motor-stat-label">Executadas</span>
+      <strong class="motor-stat-value">{{ motorStatus().executadasHoje }}</strong>
+    </div>
+    <button class="motor-stat motor-stat-clickable" (click)="irParaHistorico('Pendente')">
+      <span class="motor-stat-label">Atrasadas</span>
+      <strong class="motor-stat-value" [class.motor-alert]="motorStatus().atrasadas > 0">{{ motorStatus().atrasadas }}</strong>
+    </button>
+    <button class="motor-stat motor-stat-clickable" (click)="irParaHistorico('Falha')">
+      <span class="motor-stat-label">Erros de Integração</span>
+      <strong class="motor-stat-value" [class.motor-alert]="motorStatus().errosIntegracao > 0">{{ motorStatus().errosIntegracao }}</strong>
+    </button>
+    <div class="motor-stat">
+      <span class="motor-stat-label">Tamanho da Fila</span>
+      <strong class="motor-stat-value">{{ motorStatus().tamanhoFila }}</strong>
+    </div>
+  </div>
+</div>
+
+<div class="dash-grid dash-grid-2">
+  <div class="card regua-table-card">
+    <div class="card-pad card-pad-tight">
+      <h3 class="section-title">Réguas Cadastradas — Efetividade</h3>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Código</th><th>Descrição</th><th>Etapas</th><th>Ativa</th>
+            <th>Clientes</th><th>Valor sob Gestão</th><th>Taxa de Recuperação</th><th>Tempo Médio até Pagamento</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of reguasResumo(); track r.codigo) {
+            <tr>
+              <td class="cell-strong">{{ r.codigo }}</td>
+              <td><a class="link-cell" [routerLink]="['/reguas', r.codigo, 'etapas']">{{ r.descricao }}</a></td>
+              <td>{{ r.etapas }}</td>
+              <td><span class="badge" [class.badge-green]="r.ativa" [class.badge-red]="!r.ativa">{{ r.ativa ? 'Sim' : 'Não' }}</span></td>
+              <td>
+                <button class="num-link" (click)="irParaTitulos({ regua: r.codigo })">{{ r.clientes }}</button>
+              </td>
+              <td>
+                <button class="num-link" (click)="irParaTitulos({ regua: r.codigo, status: 'Em aberto' })">R$ {{ money(r.valorSobGestao) }}</button>
+              </td>
+              <td>{{ r.taxaRecuperacao }}%</td>
+              <td>{{ r.tempoMedioPagamento != null ? r.tempoMedioPagamento + ' dias' : '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-pad card-pad-tight">
+      <h3 class="section-title">Atividade Recente</h3>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Data/Hora</th><th>Cliente</th><th>Canal</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          @for (e of recentes(); track e.id) {
+            <tr>
+              <td class="cell-muted">{{ e.dataHora }}</td>
+              <td>{{ e.cliente }}</td>
+              <td>{{ e.canal }}</td>
+              <td><span class="badge" [ngClass]="statusClass(e.status)">{{ e.status }}</span></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="card-pad card-pad-tight">
+      <a class="link-cell" routerLink="/historico">Ver histórico completo →</a>
+    </div>
+  </div>
+</div>

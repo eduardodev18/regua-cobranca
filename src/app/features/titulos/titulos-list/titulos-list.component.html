@@ -1,0 +1,178 @@
+<div class="breadcrumb">
+  <a routerLink="/dashboard">Régua de Cobrança</a>
+  <span>›</span>
+  <span class="current">Carteira de Títulos</span>
+</div>
+
+<div class="page-header">
+  <h1 class="page-title">Carteira de Títulos</h1>
+  <button class="btn btn-outline" (click)="exportar()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3v12M7 10l5 5 5-5M4 21h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Exportar
+  </button>
+</div>
+
+<div class="card">
+  <div class="tit-filters">
+    <div class="form-field">
+      <label>Período de</label>
+      <input type="text" [ngModel]="periodoDe()" (ngModelChange)="periodoDe.set($event); resetPage()" placeholder="dd/mm/aaaa" />
+    </div>
+    <div class="form-field">
+      <label>Período até</label>
+      <input type="text" [ngModel]="periodoAte()" (ngModelChange)="periodoAte.set($event); resetPage()" placeholder="dd/mm/aaaa" />
+    </div>
+    <div class="form-field">
+      <label>Régua</label>
+      <select [ngModel]="regua()" (ngModelChange)="regua.set($event); resetPage()">
+        <option value="todas">Todas</option>
+        @for (r of reguasDisponiveis(); track r) { <option [value]="r">{{ r }}</option> }
+      </select>
+    </div>
+    <div class="form-field">
+      <label>Status</label>
+      <select [ngModel]="status()" (ngModelChange)="status.set($event); resetPage()">
+        <option value="todos">Todos</option>
+        <option value="Em aberto">Em aberto</option>
+        <option value="Pago">Pago</option>
+        <option value="Renegociado">Renegociado</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label>Aging</label>
+      <select [ngModel]="aging()" (ngModelChange)="aging.set($event); resetPage()">
+        <option value="todas">Todas as faixas</option>
+        <option value="aVencer">A vencer</option>
+        <option value="d1_30">1 - 30 dias</option>
+        <option value="d31_60">31 - 60 dias</option>
+        <option value="d61_90">61 - 90 dias</option>
+        <option value="d90mais">90+ dias</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label>Empresa / Filial</label>
+      <select [ngModel]="filial()" (ngModelChange)="filial.set($event); resetPage()">
+        <option value="todas">Todas</option>
+        @for (f of filiais; track f) { <option [value]="f">{{ f }}</option> }
+      </select>
+    </div>
+    <div class="form-field">
+      <label>Unidade de Negócio</label>
+      <select [ngModel]="unidadeNegocio()" (ngModelChange)="unidadeNegocio.set($event); resetPage()">
+        <option value="todas">Todas</option>
+        @for (u of unidadesNegocio; track u) { <option [value]="u">{{ u }}</option> }
+      </select>
+    </div>
+    <div class="form-field">
+      <label>Responsável</label>
+      <select [ngModel]="responsavel()" (ngModelChange)="responsavel.set($event); resetPage()">
+        <option value="todos">Todos</option>
+        @for (r of responsaveis; track r) { <option [value]="r">{{ r }}</option> }
+      </select>
+    </div>
+    <div class="form-field">
+      <label>Faixa de Valor (R$)</label>
+      <div class="period-row">
+        <input type="number" [ngModel]="valorMin()" (ngModelChange)="valorMin.set($event); resetPage()" placeholder="Mín." />
+        <span>-</span>
+        <input type="number" [ngModel]="valorMax()" (ngModelChange)="valorMax.set($event); resetPage()" placeholder="Máx." />
+      </div>
+    </div>
+    <div class="form-field grow">
+      <label>Buscar</label>
+      <div class="search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input type="text" placeholder="Cliente ou título..." [ngModel]="search()" (ngModelChange)="search.set($event); resetPage()" />
+      </div>
+    </div>
+    <div class="form-field limpar-wrap">
+      <label>&nbsp;</label>
+      <button class="btn btn-ghost btn-sm" (click)="limparFiltros()">Limpar filtros</button>
+    </div>
+  </div>
+
+  <div class="tit-summary">
+    <span><strong>{{ filtered().length }}</strong> título(s) encontrado(s)</span>
+    <span>Valor total: <strong>R$ {{ money(totalValor()) }}</strong></span>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Título</th>
+          <th>Régua</th>
+          <th>Filial</th>
+          <th>Unidade de Negócio</th>
+          <th>Responsável</th>
+          <th>Valor</th>
+          <th>Vencimento</th>
+          <th>Aging</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (t of paged(); track t.id) {
+          <tr>
+            <td class="cell-strong"><a class="cliente-link" [routerLink]="['/clientes', t.cliente]">{{ t.cliente }}</a></td>
+            <td class="cell-mono">{{ t.titulo }}</td>
+            <td>{{ t.regua }}</td>
+            <td class="cell-muted">{{ t.filial }}</td>
+            <td class="cell-muted">{{ t.unidadeNegocio }}</td>
+            <td>{{ t.responsavel }}</td>
+            <td class="cell-strong">R$ {{ money(t.valor) }}</td>
+            <td class="cell-muted">{{ t.dataVencimento }}</td>
+            <td>{{ agingLabel(t) }}</td>
+            <td><span class="badge" [ngClass]="statusClass(t.status)">{{ t.status }}</span></td>
+            <td>
+              <button class="icon-btn" (click)="detalhe.set(t)" aria-label="Ver detalhes">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+              </button>
+            </td>
+          </tr>
+        }
+        @if (!paged().length) {
+          <tr><td colspan="11"><div class="empty-state">Nenhum título encontrado para os filtros selecionados.</div></td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    <span class="pagination-info">Exibindo {{ paged().length ? (page()-1)*pageSize + 1 : 0 }} a {{ (page()-1)*pageSize + paged().length }} de {{ filtered().length }} registros</span>
+    <div class="pagination-controls">
+      <button class="page-btn" [disabled]="page() === 1" (click)="goToPage(page()-1)">‹</button>
+      @for (p of [].constructor(totalPages()); track $index) {
+        <button class="page-btn" [class.active]="page() === $index+1" (click)="goToPage($index+1)">{{ $index+1 }}</button>
+      }
+      <button class="page-btn" [disabled]="page() === totalPages()" (click)="goToPage(page()+1)">›</button>
+    </div>
+  </div>
+</div>
+
+@if (detalhe(); as d) {
+  <app-modal title="Detalhes do Título" width="560px" (close)="detalhe.set(null)">
+    <div class="detail-grid">
+      <div><span>Cliente</span><strong>{{ d.cliente }}</strong></div>
+      <div><span>Título</span><strong>{{ d.titulo }}</strong></div>
+      <div><span>Régua</span><strong>{{ d.regua }}</strong></div>
+      <div><span>Status</span><strong><span class="badge" [ngClass]="statusClass(d.status)">{{ d.status }}</span></strong></div>
+      <div><span>Filial</span><strong>{{ d.filial }}</strong></div>
+      <div><span>Unidade de Negócio</span><strong>{{ d.unidadeNegocio }}</strong></div>
+      <div><span>Responsável</span><strong>{{ d.responsavel }}</strong></div>
+      <div><span>Valor</span><strong>R$ {{ money(d.valor) }}</strong></div>
+      <div><span>Vencimento</span><strong>{{ d.dataVencimento }}</strong></div>
+      <div><span>Aging</span><strong>{{ agingLabel(d) }}</strong></div>
+      @if (d.status === 'Pago') {
+        <div><span>Data de Pagamento</span><strong>{{ d.dataPagamento }}</strong></div>
+        <div><span>Valor Pago</span><strong>R$ {{ money(d.valorPago || 0) }}</strong></div>
+      }
+    </div>
+    <div modal-footer>
+      <a class="btn btn-outline" [routerLink]="['/reguas', d.regua, 'etapas']" (click)="detalhe.set(null)">Ver Régua</a>
+      <button class="btn btn-primary" (click)="detalhe.set(null)">Fechar</button>
+    </div>
+  </app-modal>
+}

@@ -1,0 +1,191 @@
+<div class="breadcrumb">
+  <a routerLink="/reguas">Régua de Cobrança</a>
+  <span>›</span>
+  <span class="current">Templates</span>
+</div>
+
+<div class="page-header">
+  <h1 class="page-title">Templates</h1>
+  <button class="btn btn-primary" (click)="openNew()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+    Novo Template
+  </button>
+</div>
+
+<div class="card">
+  <div class="toolbar">
+    <select class="canal-select" [ngModel]="canalFiltro()" (ngModelChange)="canalFiltro.set($event)">
+      <option value="Todos">Todos</option>
+      @for (c of canais; track c) { <option [value]="c">{{ c }}</option> }
+    </select>
+    <div class="search-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <input type="text" placeholder="Buscar código ou descrição..." [ngModel]="search()" (ngModelChange)="search.set($event)" />
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Descrição</th>
+          <th>Canal</th>
+          <th>Assunto / Título</th>
+          <th>Ativo</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          <tr><td colspan="6"><div class="empty-state">Carregando templates...</div></td></tr>
+        } @else if (error()) {
+          <tr><td colspan="6"><div class="empty-state">{{ error() }}</div></td></tr>
+        } @else {
+          @for (t of filtered(); track t.codigo) {
+            <tr>
+              <td class="cell-strong">{{ t.codigo }}</td>
+              <td>{{ t.descricao }}</td>
+              <td>{{ canalLabel(t) }}</td>
+              <td class="cell-muted">{{ t.assunto || bodyPreview(t) }}</td>
+              <td>
+                <span class="badge" [class.badge-green]="t.ativo === '1'" [class.badge-red]="t.ativo !== '1'">{{ t.ativo === '1' ? 'Sim' : 'Não' }}</span>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <button class="icon-btn" (click)="openPreview(t)" aria-label="Visualizar">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+                  </button>
+                  <button class="icon-btn" (click)="openEdit(t)" aria-label="Editar">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 20h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                  </button>
+                  <div class="menu-wrap">
+                    <button class="icon-btn" (click)="toggleMenu(t.codigo, $event)" aria-label="Mais ações">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="19" r="1.6" fill="currentColor"/></svg>
+                    </button>
+                    @if (openMenuFor() === t.codigo && menuPos(); as pos) {
+                      <div class="dropdown action-menu dropdown-fixed" [style.top.px]="pos.top" [style.left.px]="pos.left">
+                        <a class="dropdown-link danger" (click)="remove(t)">Excluir</a>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (!filtered().length) {
+            <tr><td colspan="6"><div class="empty-state">Nenhum template encontrado.</div></td></tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    <span class="pagination-info">Exibindo 1 a {{ filtered().length }} de {{ filtered().length }} registros</span>
+    <div class="pagination-controls">
+      <button class="page-btn" disabled>‹</button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn" disabled>›</button>
+    </div>
+  </div>
+</div>
+
+@if (showModal()) {
+  <app-modal [title]="editingCodigo ? 'Editar Template' : 'Novo Template'" width="680px" (close)="closeModal()">
+    @if (saveError()) {
+      <div class="empty-state" style="margin-bottom: 12px; color: #b3261e;">{{ saveError() }}</div>
+    }
+    <div class="form-grid">
+      @if (editingCodigo) {
+        <div class="form-field">
+          <label>Código</label>
+          <input type="text" [value]="editingCodigo" disabled />
+        </div>
+      }
+      <div class="form-field">
+        <label>Canal</label>
+        <select [ngModel]="form.canal" (ngModelChange)="onCanalSelect($event)">
+          @for (c of canais; track c) { <option [value]="c">{{ c }}</option> }
+        </select>
+      </div>
+      <div class="form-field full">
+        <label>Descrição</label>
+        <input type="text" [(ngModel)]="form.descricao" placeholder="Ex: E-mail Cobrança Inicial" />
+      </div>
+      <div class="form-field full">
+        <label>Assunto</label>
+        <input type="text" [(ngModel)]="form.assunto" placeholder="Ex: Pendência Financeira - [cliente]" />
+      </div>
+      <div class="form-field full">
+        <label>Corpo da Mensagem</label>
+
+        <div class="var-chips">
+          @for (v of variaveis; track v) {
+            <button type="button" class="var-chip" (click)="insertVariable(v)">{{ wrapVar(v) }}</button>
+          }
+        </div>
+
+        @if (isRichEditor) {
+          <div class="rte-toolbar">
+            <button type="button" class="rte-btn" (click)="exec('bold')" title="Negrito"><strong>B</strong></button>
+            <button type="button" class="rte-btn" (click)="exec('italic')" title="Itálico"><em>I</em></button>
+            <button type="button" class="rte-btn" (click)="exec('underline')" title="Sublinhado"><u>S</u></button>
+            <span class="rte-sep"></span>
+            <button type="button" class="rte-btn" (click)="exec('insertUnorderedList')" title="Lista com marcadores">• Lista</button>
+            <button type="button" class="rte-btn" (click)="exec('insertOrderedList')" title="Lista numerada">1. Lista</button>
+            <span class="rte-sep"></span>
+            <button type="button" class="rte-btn" (click)="insertLink()" title="Inserir link">Link</button>
+            <button type="button" class="rte-btn" (click)="exec('removeFormat')" title="Limpar formatação">Limpar</button>
+          </div>
+          <div
+            #corpoEditor
+            class="rte-editor"
+            contenteditable="true"
+            [innerHTML]="editorSeed"
+            (input)="onEditorInput($event)"
+          ></div>
+          <span class="hint">Clique numa variável acima pra inserir no corpo, na posição do cursor.</span>
+        } @else {
+          <div class="rte-toolbar">
+            <button type="button" class="rte-btn" (click)="mdWrap('*')" title="Negrito (*texto*)"><strong>B</strong></button>
+            <button type="button" class="rte-btn" (click)="mdWrap('_')" title="Itálico (_texto_)"><em>I</em></button>
+            <button type="button" class="rte-btn" (click)="mdWrap('~')" title="Riscado (~texto~)"><s>S</s></button>
+            <button type="button" class="rte-btn" (click)="mdWrap(mdMonoMarker)" title="Monoespaçado">{{ mdMonoMarker }}</button>
+          </div>
+          <textarea #corpoTextarea rows="5" [(ngModel)]="form.corpo" [placeholder]="corpoPlaceholder"></textarea>
+          <span class="hint">Markdown simples do WhatsApp — selecione um trecho e clique num botão acima (ou clique numa variável) pra aplicar na posição do cursor.</span>
+        }
+      </div>
+      <div class="form-field">
+        <label>Ativo</label>
+        <select [ngModel]="form.ativo ? 'sim' : 'nao'" (ngModelChange)="form.ativo = $event === 'sim'">
+          <option value="sim">Sim</option>
+          <option value="nao">Não</option>
+        </select>
+      </div>
+    </div>
+    <div modal-footer>
+      <button class="btn btn-ghost" (click)="closeModal()" [disabled]="saving()">Cancelar</button>
+      <button class="btn btn-primary" (click)="save()" [disabled]="saving()">{{ saving() ? 'Salvando...' : 'Salvar Template' }}</button>
+    </div>
+  </app-modal>
+}
+
+@if (showPreview() && previewTemplate; as t) {
+  <app-modal title="Pré-visualização do Template" width="520px" (close)="showPreview.set(false)">
+    <div class="preview-card" [class.preview-chat]="canalLabel(t) === 'WhatsApp' || canalLabel(t) === 'SMS'">
+      @if (t.assunto) {
+        <div class="preview-subject">{{ t.assunto }}</div>
+      }
+      @if (canalLabel(t) === 'E-mail') {
+        <div class="preview-body" [innerHTML]="t.corpo"></div>
+      } @else {
+        <div class="preview-body" [innerHTML]="markdownToPreviewHtml(t.corpo)"></div>
+      }
+    </div>
+    <div modal-footer>
+      <button class="btn btn-primary" (click)="showPreview.set(false)">Fechar</button>
+    </div>
+  </app-modal>
+}
