@@ -4,5 +4,5 @@
 // ({apiBase}/{tenant}/auth/login).
 export const environment = {
   production: false,
-  apiBase: 'https://portaldecompras-hom.oab.org.br/api'
+  apiBase: 'https://portaldecompras.oab.org.br/api'
 };
