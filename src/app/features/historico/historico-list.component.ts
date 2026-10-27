@@ -50,12 +50,12 @@ interface RegistroForm {
 /**
  * Histórico (collection-history) — ver seção 5 do API_REGUA_COBRANCA.md.
  *
- * A API só permite consulta paginada POR CLIENTE (GET .../collection-history/{clientCode})
- * e registro de contato manual (POST .../collection-history/register-result) — não existe
- * endpoint que liste histórico de todos os clientes de uma vez. Por isso esta tela funciona
- * como uma "consulta": o operador informa o código do cliente (Protheus) e, opcionalmente,
- * filtra por régua/status. Ainda não há um domínio de Clientes/Fornecedores no front pra
- * buscar esse código por nome — por ora é digitado manualmente (ver PENDENCIAS_BACKEND.md).
+ * A tela já abre carregando tudo (Régua = Todas, Status = Todos, sem cliente) — o backend
+ * aceita consultar o histórico de todos os clientes de uma vez (GET .../collection-history,
+ * paginado). O operador pode digitar um código de cliente (Protheus) pra filtrar só aquele
+ * cliente (GET .../collection-history/{clientCode}); é digitado manualmente porque ainda
+ * não há um domínio de Clientes/Fornecedores no front pra buscar por nome (ver
+ * PENDENCIAS_BACKEND.md).
  */
 @Component({
   selector: 'app-historico-list',
@@ -105,27 +105,21 @@ export class HistoricoListComponent implements OnInit {
 
   ngOnInit(): void {
     this.rulesService.list().subscribe({ next: (data) => this.reguas.set(data) });
-    if (this.codCliente().trim()) this.buscar();
+    this.buscar();
   }
 
   buscar(): void {
-    const cliente = this.codCliente().trim();
-    if (!cliente) {
-      this.error.set('Informe o código do cliente para consultar o histórico.');
-      return;
-    }
     this.page.set(1);
     this.carregarPagina();
   }
 
   private carregarPagina(): void {
     const cliente = this.codCliente().trim();
-    if (!cliente) return;
     this.loading.set(true);
     this.error.set(null);
     this.searched.set(true);
     this.historyService
-      .getByClient(cliente, {
+      .getByClient(cliente || undefined, {
         page: this.page(),
         pageSize: this.pageSize,
         codRegua: this.reguaFiltro() === 'todas' ? undefined : this.reguaFiltro(),
@@ -141,7 +135,7 @@ export class HistoricoListComponent implements OnInit {
         error: () => {
           this.loading.set(false);
           this.items.set([]);
-          this.error.set('Não foi possível carregar o histórico deste cliente.');
+          this.error.set(cliente ? 'Não foi possível carregar o histórico deste cliente.' : 'Não foi possível carregar o histórico.');
         }
       });
   }
@@ -175,6 +169,17 @@ export class HistoricoListComponent implements OnInit {
     if (isNaN(d.getTime())) return raw;
     const pad = (n: number) => String(n).padStart(2, '0');
     return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  /**
+   * `observacao`/`retorno` vêm do Protheus com um bug de encoding conhecido: a string
+   * (UTF-16) é relida como se fosse de 1 byte por caractere, e cada caractere real acaba
+   * intercalado com um caractere nulo (U+0000) — por isso aparece "espaçado" na tela.
+   * Removendo os nulos a string volta ao normal; não precisa de nenhuma outra conversão.
+   */
+  cleanText(text: string | null): string {
+    if (!text) return '';
+    return text.replace(/\u0000/g, '').trim();
   }
 
   abrirDetalhe(item: ApiHistoryItem): void {

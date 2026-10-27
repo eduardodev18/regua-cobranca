@@ -15,7 +15,7 @@
 <div class="card">
   <div class="hist-filters">
     <div class="form-field">
-      <label>Código do Cliente</label>
+      <label>Código do Cliente <span class="hint">(opcional)</span></label>
       <input type="text" placeholder="Ex: 150807" [ngModel]="codCliente()" (ngModelChange)="codCliente.set($event)" (keydown.enter)="buscar()" />
     </div>
     <div class="form-field">
@@ -46,6 +46,10 @@
         <tr>
           <th>Data / Hora</th>
           <th>Régua</th>
+          <th>Prefixo</th>
+          <th>Número</th>
+          <th>Parcela</th>
+          <th>Tipo</th>
           <th>Etapa / Ação</th>
           <th>Canal</th>
           <th>Destino</th>
@@ -56,16 +60,20 @@
       </thead>
       <tbody>
         @if (loading()) {
-          <tr><td colspan="8"><div class="empty-state">Carregando histórico...</div></td></tr>
+          <tr><td colspan="12"><div class="empty-state">Carregando histórico...</div></td></tr>
         } @else if (error()) {
-          <tr><td colspan="8"><div class="empty-state">{{ error() }}</div></td></tr>
+          <tr><td colspan="12"><div class="empty-state">{{ error() }}</div></td></tr>
         } @else if (!searched()) {
-          <tr><td colspan="8"><div class="empty-state">Informe o código do cliente e clique em Buscar para consultar o histórico.</div></td></tr>
+          <tr><td colspan="12"><div class="empty-state">Use os filtros acima para consultar o histórico.</div></td></tr>
         } @else {
           @for (it of items(); track it.sequencia + it.dataExecucao) {
             <tr>
               <td class="cell-mono">{{ formatDate(it.dataExecucao) }}</td>
               <td class="cell-strong">{{ it.codRegua }}</td>
+              <td class="cell-mono">{{ it.prefixo || '—' }}</td>
+              <td class="cell-mono">{{ it.numTitulo || '—' }}</td>
+              <td class="cell-mono">{{ it.parcela || '—' }}</td>
+              <td class="cell-mono">{{ it.tipoTitulo || '—' }}</td>
               <td>Etapa {{ it.seqEtapa }} · Ação {{ it.seqAcao }} <span class="cell-muted">({{ it.tipoAcao }})</span></td>
               <td>{{ it.canal }}</td>
               <td class="cell-muted">{{ it.destino || '—' }}</td>
@@ -81,7 +89,7 @@
             </tr>
           }
           @if (!items().length) {
-            <tr><td colspan="8"><div class="empty-state">Nenhum registro encontrado para este cliente com os filtros informados.</div></td></tr>
+            <tr><td colspan="12"><div class="empty-state">Nenhum registro encontrado com os filtros informados.</div></td></tr>
           }
         }
       </tbody>
@@ -115,11 +123,12 @@
       <div><span>Hora</span><strong>{{ formatDate(d.hora) }}</strong></div>
       <div><span>Usuário</span><strong>{{ d.usuario || '—' }}</strong></div>
       <div><span>Data da Promessa</span><strong>{{ d.dataPromessa ? formatDate(d.dataPromessa) : '—' }}</strong></div>
-      @if (d.prefixo || d.numTitulo || d.parcela || d.tipoTitulo) {
-        <div class="full"><span>Título</span><strong>{{ d.prefixo }} {{ d.numTitulo }}{{ d.parcela ? '/' + d.parcela : '' }} {{ d.tipoTitulo }}</strong></div>
-      }
-      <div class="full"><span>Retorno</span><strong class="obs-text">{{ d.retorno || '—' }}</strong></div>
-      <div class="full"><span>Observação</span><strong class="obs-text">{{ d.observacao || '—' }}</strong></div>
+      <div><span>Prefixo</span><strong>{{ d.prefixo || '—' }}</strong></div>
+      <div><span>Número do Título</span><strong>{{ d.numTitulo || '—' }}</strong></div>
+      <div><span>Parcela</span><strong>{{ d.parcela || '—' }}</strong></div>
+      <div><span>Tipo do Título</span><strong>{{ d.tipoTitulo || '—' }}</strong></div>
+      <div class="full"><span>Retorno</span><strong class="obs-text">{{ cleanText(d.retorno) || '—' }}</strong></div>
+      <div class="full"><span>Observação</span><strong class="obs-text">{{ cleanText(d.observacao) || '—' }}</strong></div>
     </div>
     <div modal-footer>
       <button class="btn btn-primary" (click)="fecharDetalhe()">Fechar</button>

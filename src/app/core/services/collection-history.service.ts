@@ -9,11 +9,11 @@ import { TenantService } from './tenant.service';
 /**
  * Histórico — /api/{tenant}/collection-history (ver seção 5 do API_REGUA_COBRANCA.md).
  *
- * IMPORTANTE: a consulta é sempre por cliente (`clientCode`) — não existe endpoint pra
- * listar o histórico de todos os clientes de uma vez. `clientCode` é o código Protheus
- * do cliente (ex: "150807" no exemplo do doc), não o nome nem o CNPJ — ainda não temos
- * de onde tirar esse código no front (não há endpoint de clientes/fornecedores neste
- * documento), então quem chamar este serviço precisa ter esse código de outra fonte.
+ * `clientCode` agora é opcional: informado, consulta só aquele cliente
+ * (GET .../collection-history/{clientCode}); omitido, o backend lista de todos os
+ * clientes (GET .../collection-history), sempre paginado e filtrável por régua/status.
+ * `clientCode`, quando usado, é o código Protheus do cliente (ex: "150807" no exemplo do
+ * doc), não o nome nem o CNPJ.
  */
 @Injectable({ providedIn: 'root' })
 export class CollectionHistoryService {
@@ -25,7 +25,7 @@ export class CollectionHistoryService {
   }
 
   getByClient(
-    clientCode: string,
+    clientCode: string | null | undefined,
     opts: { page?: number; pageSize?: number; codRegua?: string; status?: string } = {}
   ): Observable<ApiHistoryPage> {
     let params = new HttpParams();
@@ -34,8 +34,11 @@ export class CollectionHistoryService {
     if (opts.codRegua) params = params.set('codRegua', opts.codRegua);
     if (opts.status) params = params.set('status', opts.status);
 
+    const code = clientCode?.trim();
+    const url = code ? `${this.base}/${code}` : this.base;
+
     return this.http
-      .get<ApiResponse<ApiHistoryPage>>(`${this.base}/${clientCode}`, { params })
+      .get<ApiResponse<ApiHistoryPage>>(url, { params })
       .pipe(map(r => r.data));
   }
 
