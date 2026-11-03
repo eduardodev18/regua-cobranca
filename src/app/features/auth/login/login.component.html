@@ -9,7 +9,7 @@
     </div>
 
     <h1 class="login-title">Entrar na plataforma</h1>
-    <p class="login-subtitle">Informe seu CNPJ e senha para acessar. Seu perfil de acesso é definido automaticamente após o login.</p>
+    <p class="login-subtitle">Informe seu CNPJ ou usuário e senha para acessar. Seu perfil de acesso é definido automaticamente após o login.</p>
 
     @if (sessionExpired()) {
       <div class="login-banner login-banner-warn">Sua sessão expirou. Faça login novamente para continuar.</div>
@@ -21,18 +21,19 @@
 
     <form class="login-form" (ngSubmit)="onSubmit()">
       <div class="form-field">
-        <label>CNPJ</label>
+        <label>CNPJ ou usuário</label>
         <input
           type="text"
-          inputmode="numeric"
-          placeholder="00.000.000/0000-00"
-          [ngModel]="cnpj()"
-          (ngModelChange)="onCnpjChange($event)"
-          name="cnpj"
-          [class.invalid]="touched() && cnpjInvalido"
+          placeholder="00.000.000/0000-00 ou usuário"
+          [ngModel]="identificador()"
+          (ngModelChange)="onIdentificadorChange($event)"
+          name="identificador"
+          [class.invalid]="touched() && identificadorInvalido"
         />
-        @if (touched() && cnpjInvalido) {
-          <span class="field-error">Informe um CNPJ válido (14 dígitos).</span>
+        @if (touched() && identificadorInvalido) {
+          <span class="field-error">
+            {{ isCnpjMode ? 'Informe um CNPJ válido (14 dígitos).' : 'Informe seu CNPJ ou usuário.' }}
+          </span>
         }
       </div>
 

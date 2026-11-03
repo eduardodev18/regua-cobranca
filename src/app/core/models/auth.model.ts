@@ -4,7 +4,7 @@
 export type UserRole = 'admin' | 'cliente';
 
 export interface LoginPayload {
-  username: string; // CNPJ do usuário, sem máscara
+  username: string; // CNPJ (sem máscara, só dígitos) ou usuário em texto livre
   password: string;
 }
 
